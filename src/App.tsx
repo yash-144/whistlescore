@@ -1,21 +1,20 @@
-import React from 'react';
-import {
-  ShieldAlert,
-  Radio,
-  FileCode2,
-  Lock,
-  Eye,
-  CheckCircle2,
-  Activity,
-  Layers,
-  ArrowUpRight,
-  Sparkles,
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { HelpCircle, X, ExternalLink, ShieldCheck, Lock, Eye } from 'lucide-react';
 import { useMidnight, PREPROD_CONTRACT_ADDRESS } from './hooks/useMidnight';
 import { WalletConnect } from './components/WalletConnect';
 import { CircuitCall } from './components/CircuitCall';
 
+const DREAMY_SCENES = [
+  { id: 'crescent', name: 'Crescent Dawn', path: '/images/dream_beacon.jpg', label: 'THE FIRST THREAD OF LIGHT' },
+  { id: 'hills', name: 'Rolling Pastures', path: '/images/dream_crescent_2.jpg', label: 'PEACEFUL HORIZON' },
+  { id: 'mound', name: 'Wildflower Mound', path: '/images/meadow_clean.jpg', label: 'PASTORAL DIORAMA' },
+];
+
 export const App: React.FC = () => {
+  const [activeScene, setActiveScene] = useState(DREAMY_SCENES[0]);
+  const [isAutoCycle, setIsAutoCycle] = useState<boolean>(true);
+  const [showInfo, setShowInfo] = useState(false);
+
   const {
     wallet,
     counter,
@@ -26,169 +25,197 @@ export const App: React.FC = () => {
     callIncrement,
   } = useMidnight();
 
+  // Smooth Auto-Cycle Timer
+  useEffect(() => {
+    if (!isAutoCycle) return;
+    const interval = setInterval(() => {
+      setActiveScene((current) => {
+        const nextIdx = (DREAMY_SCENES.findIndex((s) => s.id === current.id) + 1) % DREAMY_SCENES.length;
+        return DREAMY_SCENES[nextIdx];
+      });
+    }, 6500);
+
+    return () => clearInterval(interval);
+  }, [isAutoCycle]);
+
   return (
-    <div className="app-container">
+    <div className="pastoral-stage">
+      {/* Smooth Crossfade Background Image Layers */}
+      <div className="pastoral-bg-container">
+        {DREAMY_SCENES.map((scene) => (
+          <div
+            key={scene.id}
+            className={`pastoral-bg-layer ${activeScene.id === scene.id ? 'active' : ''}`}
+            style={{ backgroundImage: `url(${scene.path})` }}
+          />
+        ))}
+      </div>
+
+      {/* Soft Daylight Backdrop Glow */}
+      <div className="pastoral-vignette" />
+
       {/* Top Header */}
-      <header className="app-header">
-        <div className="brand-section">
-          <div className="logo-icon">
-            <ShieldAlert size={24} color="#ffffff" />
+      <header className="stage-header">
+        <div className="brand-wrapper">
+          <div className="brand-title-pixel">
+            <span className="pixel-dot" />
+            <span>WHISTLESCORE</span>
           </div>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span className="brand-title">WhistleScore</span>
-              <span className="brand-tag">Level 2 • Preprod</span>
-            </div>
-            <div style={{ fontSize: '12px', color: 'var(--text-subtle)', marginTop: '2px' }}>
-              Privacy-Preserving Safety Auditing on Midnight
-            </div>
+          {/* High-visibility thread pill in pixel font */}
+          <div className="thread-light-badge-daylight">
+            THE FIRST THREAD OF LIGHT • CYCLE 02
           </div>
         </div>
 
-        <WalletConnect
-          wallet={wallet}
-          onConnect={connect}
-          onDisconnect={disconnect}
-        />
-      </header>
+        <div className="header-actions">
+          {/* Info '?' Button */}
+          <button
+            onClick={() => setShowInfo(true)}
+            className="btn-info-circle-daylight"
+            title="About WhistleScore & The Privacy Model"
+          >
+            ?
+          </button>
 
-      {/* Hero Section */}
-      <section className="glass-panel hero-card">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Sparkles size={16} color="#38bdf8" />
-          <span style={{ fontSize: '13px', fontWeight: 600, color: '#38bdf8', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
-            Zero-Knowledge Workplace Reporting
-          </span>
-        </div>
-        <h1 className="hero-title">
-          Empowering Whistleblowers with <span>Uncompromising Privacy</span>.
-        </h1>
-        <p className="hero-desc">
-          WhistleScore allows verified personnel to record safety violations and hazard severity directly into a public, tamper-proof company ledger. Employees prove their authorization token locally via zero-knowledge proofs without exposing their identity or credentials.
-        </p>
-      </section>
-
-      {/* Main Grid */}
-      <main className="main-grid">
-        {/* Left Column: State & Privacy Model */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Public Counter Box */}
-          <div className="glass-panel counter-box">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-muted)', fontSize: '13px', fontWeight: 600 }}>
-              <Activity size={16} color="#6366f1" />
-              <span>Public Cumulative Hazard Score</span>
-            </div>
-            <div className="counter-value">{counter.toString()}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-subtle)' }}>
-              Verified On-Chain Ledger State ({wallet.networkId})
-            </div>
-          </div>
-
-          {/* Privacy Model Card */}
-          <div className="glass-panel" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <Layers size={18} color="#06b6d4" />
-              <h3 style={{ fontSize: '16px', fontWeight: 700 }}>WhistleScore Privacy Model</h3>
-            </div>
-
-            <table className="privacy-table">
-              <thead>
-                <tr>
-                  <th>Field / Property</th>
-                  <th>Visibility</th>
-                  <th>Observation</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style={{ fontWeight: 600 }}>
-                    <code>counter</code>
-                  </td>
-                  <td>
-                    <span style={{ color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Eye size={13} /> Public
-                    </span>
-                  </td>
-                  <td style={{ color: 'var(--text-muted)' }}>Visible to auditors and regulators on-chain</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 600 }}>
-                    <code>step</code>
-                  </td>
-                  <td>
-                    <span style={{ color: '#38bdf8', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Eye size={13} /> Disclosed
-                    </span>
-                  </td>
-                  <td style={{ color: 'var(--text-muted)' }}>Revealed during increment transaction</td>
-                </tr>
-                <tr>
-                  <td style={{ fontWeight: 600 }}>
-                    <code>secret_token</code>
-                  </td>
-                  <td>
-                    <span style={{ color: '#34d399', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Lock size={13} /> Private Witness
-                    </span>
-                  </td>
-                  <td style={{ color: '#34d399' }}>Never leaves browser; proven locally via ZK</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          {/* Contract Deployment Info Card */}
-          <div className="glass-panel" style={{ padding: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <FileCode2 size={18} color="#818cf8" />
-              <h3 style={{ fontSize: '15px', fontWeight: 700 }}>Contract Details</h3>
-            </div>
-            <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <div>
-                <div style={{ color: 'var(--text-subtle)', marginBottom: '2px' }}>Preprod Contract Address:</div>
-                <div className="mono" style={{ color: '#e2e8f0', wordBreak: 'break-all', background: 'rgba(0,0,0,0.3)', padding: '6px 10px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                  {contractAddress}
-                </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Target Network:</span>
-                <strong style={{ color: '#e2e8f0' }}>Midnight Preprod / Preview</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', color: 'var(--text-muted)' }}>
-                <span>Contract Type:</span>
-                <strong style={{ color: '#e2e8f0' }}>Compact (v0.23+)</strong>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Interactive Circuit Execution */}
-        <div>
-          <CircuitCall
+          {/* Wallet Connect Pill */}
+          <WalletConnect
             wallet={wallet}
-            counter={counter}
-            circuitState={circuitState}
-            contractAddress={contractAddress}
-            onIncrement={callIncrement}
+            onConnect={connect}
+            onDisconnect={disconnect}
           />
         </div>
+      </header>
+
+      {/* Center Editorial Focus with Pixel Typography */}
+      <main className="stage-center">
+        <div className="hero-text-block">
+          <h1 className="pixel-headline">
+            <span>WHISTLE</span>
+            <span>SCORE</span>
+          </h1>
+
+          <p className="pixel-sub">
+            Workplace safety verified on the Midnight blockchain. The public ledger records the score; zero-knowledge proofs protect the whistleblower.
+          </p>
+        </div>
+
+        {/* Daylight Frosted Capsule Dock */}
+        <CircuitCall
+          wallet={wallet}
+          counter={counter}
+          circuitState={circuitState}
+          contractAddress={contractAddress}
+          onIncrement={callIncrement}
+        />
       </main>
 
-      {/* Footer */}
-      <footer
-        style={{
-          textAlign: 'center',
-          padding: '24px 0',
-          color: 'var(--text-subtle)',
-          fontSize: '13px',
-          borderTop: '1px solid rgba(255, 255, 255, 0.06)',
-          marginTop: '20px',
-        }}
-      >
-        <p>
-          WhistleScore • Midnight Builder Challenge Level 2 • Built with Compact, Midnight.js & Lace Wallet
-        </p>
+      {/* Bottom Technical Stamps */}
+      <footer className="stage-footer">
+        <div className="footer-stamp-box-daylight">
+          <span>CONTRACT // <span className="stamp-accent">{PREPROD_CONTRACT_ADDRESS.slice(0, 16)}...</span></span>
+          <span style={{ fontSize: '10px', opacity: 0.8 }}>
+            PUBLIC: counter, step • WITNESS: secret_token
+          </span>
+        </div>
+
+        <div className="atmosphere-stamp-card">
+          {/* Top Row: Scene Name & Cute Cycle Toggle */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '10px', opacity: 0.7, letterSpacing: '1px' }}>ATMOSPHERE //</span>
+              <span className="stamp-accent" style={{ fontSize: '11px', letterSpacing: '0.5px' }}>
+                {activeScene.name.toUpperCase()}
+              </span>
+            </div>
+
+            {/* Cute Cycle Auto / Manual Toggle Button */}
+            <button
+              type="button"
+              onClick={() => setIsAutoCycle((prev) => !prev)}
+              className="btn-cycle-toggle"
+              title={isAutoCycle ? 'Click to switch to Manual cycling' : 'Click to switch to Auto cycling'}
+            >
+              <span className={`toggle-track ${isAutoCycle ? 'active' : ''}`}>
+                <span className="toggle-thumb" />
+              </span>
+              <span className="cycle-text-label">CYCLE: {isAutoCycle ? 'AUTO' : 'MANUAL'}</span>
+            </button>
+          </div>
+
+          {/* Bottom Row: Narrative Label & Switcher Dots */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+            <span style={{ fontSize: '10px', opacity: 0.8, letterSpacing: '0.5px', color: 'var(--meadow-green)' }}>
+              {activeScene.label}
+            </span>
+
+            <div className="scene-switcher">
+              {DREAMY_SCENES.map((scene) => (
+                <span
+                  key={scene.id}
+                  onClick={() => {
+                    setActiveScene(scene);
+                  }}
+                  title={scene.name}
+                  className={`scene-dot-daylight ${activeScene.id === scene.id ? 'active' : ''}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
       </footer>
+
+      {/* Information / Privacy Model Modal */}
+      {showInfo && (
+        <div className="info-modal-backdrop" onClick={() => setShowInfo(false)}>
+          <div className="info-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title">About WhistleScore</div>
+              <button
+                onClick={() => setShowInfo(false)}
+                className="modal-close-btn"
+                title="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="modal-section">
+              <div className="modal-section-title">What is WhistleScore?</div>
+              <p className="modal-section-body">
+                WhistleScore is a privacy-first workplace safety auditing dApp. In high-risk industries, employees often hesitate to report violations out of fear of retaliation. WhistleScore allows workers to increment an immutable public hazard score using zero-knowledge proofs without exposing their identity or credentials.
+              </p>
+            </div>
+
+            <div className="modal-section">
+              <div className="modal-section-title">The Midnight Privacy Model</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Eye size={14} color="#38bdf8" />
+                  <span><strong>PUBLIC:</strong> The cumulative <code>counter</code> and the disclosed increment <code>step</code> (+1, +3, +5).</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Lock size={14} color="#fde68a" />
+                  <span><strong>PRIVATE WITNESS:</strong> The <code>secret_token</code> (must equal 42). Stays strictly on your machine.</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={14} color="#34d399" />
+                  <span><strong>PROVED:</strong> You mathematically prove knowledge of the valid authorization token without revealing it.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="modal-section">
+              <div className="modal-section-title">Preprod Contract Telemetry</div>
+              <div className="modal-telemetry-box">
+                {PREPROD_CONTRACT_ADDRESS}
+              </div>
+              <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.45)' }}>
+                Target Network: Midnight Preprod / Preview • Circuit: increment(step, secret_token)
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
