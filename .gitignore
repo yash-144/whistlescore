@@ -21,6 +21,7 @@ build/
 *.seed
 *.log
 deployment-output.txt
+MEMORY.md
 
 # OS & Editor
 .DS_Store
