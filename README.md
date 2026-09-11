@@ -1,30 +1,40 @@
 # WhistleScore
 > A privacy-preserving workplace safety & hazard counter built on Midnight using zero-knowledge proofs.
 
+## Live Demo
+[PASTE LIVE URL AFTER DEPLOYING FRONTEND]
+
 ## Contract Address
 | Network  | Address                          |
 |----------|----------------------------------|
-| Preview  | 8d1e491d24fc5e2c43e16204ed8e4ac8cd26ad3659899b9769819d7ccd53c15f |
-| Preprod  | N/A (Deployed to Preview for Level 1) |
+| Preprod  | `8d1e491d24fc5e2c43e16204ed8e4ac8cd26ad3659899b9769819d7ccd53c15f` |
 
 ## What This Does
-This contract maintains a public counter on the Midnight blockchain. Users can increment the counter by a specific step amount, provided they can prove they know the correct secret authorization token. The step amount added is disclosed publicly, but the secret token is kept entirely private and never leaves the user's local machine.
+WhistleScore is a privacy-first decentralized workplace safety reporting application. In high-stakes and regulated industries (e.g. aviation, chemical manufacturing, healthcare), workers often fear retaliation if they report safety violations. 
+
+WhistleScore solves this dilemma by allowing employees to add incident severity points to an immutable, public company hazard score. Using Midnight's zero-knowledge smart contract, an employee proves they hold a valid internal authorization token without ever disclosing the token or their identity to the company, auditors, or on-chain observers.
 
 ## Privacy Model
-- What is PUBLIC (on-chain, visible to anyone): The `counter` state variable and the `step` amount during each increment transaction.
-- What is PRIVATE (private witness, never on-chain): The `secret_token` parameter passed into the `increment` circuit.
-- What the user PROVES without revealing: The user proves they know the correct `secret_token` (which must equal 42) to authorize the increment action, without revealing the token itself.
+- **What is PUBLIC:**
+  - The `counter` state variable stored in the contract ledger (the cumulative hazard severity score).
+  - The `step` amount (e.g., +1, +3, +5) deliberately disclosed when invoking the `increment` circuit.
+- **What is PRIVATE:**
+  - The `secret_token` private witness parameter supplied by the caller. It remains strictly in local memory and is never placed on-chain.
+- **What the user PROVES without revealing:**
+  - The user proves they possess a valid authorization token (`secret_token == 42`) entitled to log workplace hazard points, without revealing the token or any identifying information.
+
+## Privacy Claim
+An on-chain observer or company auditor can observe the updated public safety score and the exact severity step increment, but cannot see who submitted the transaction, which authorization voucher was used, or any private credentials. The zero-knowledge proof verifies authorization mathematically while preserving complete whistleblower anonymity.
 
 ## Tech Stack
-- Midnight network, Compact language, Node.js v22, Docker
+Midnight network, Compact, Midnight.js SDK, React/Vite, Lace wallet
 
 ## Prerequisites
-- **Node.js**: v22
-- **Docker**: For running the Midnight proof server
-- **Compact Compiler**: v0.31.1 or compatible (`curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh`)
+- Midnight Lace wallet installed (browser extension)
+- Node.js v22
 
-## Setup
-1. Clone the repository and navigate into the project root:
+## Run Locally
+1. Clone the repository:
    ```bash
    git clone https://github.com/yash-144/whistlescore.git
    cd whistlescore
@@ -33,26 +43,19 @@ This contract maintains a public counter on the Midnight blockchain. Users can i
    ```bash
    npm install
    ```
-3. Compile the Compact contract:
+3. Run the development server:
    ```bash
-   npm run compile
-   # or: compact compile contracts/counter.compact managed/counter
+   npm run dev
+   ```
+   Open `http://localhost:5173` in your browser.
+4. Run tests:
+   ```bash
+   npm test
+   ```
+5. Build for production:
+   ```bash
+   npm run build
    ```
 
-## Run Tests
-Run the test suite to verify the circuit logic, state transitions, and privacy preservation:
-```bash
-npm test
-# or: npx vitest run tests/counter.test.ts
-```
-
-## Initial Idea
-In high-risk industries (aviation, manufacturing, healthcare), workers often hesitate to report safety violations due to fear of employer retaliation. WhistleScore allows verified employees to submit incident severity points to a public company safety score using a private employee voucher witness. Regulators and the public get transparent, immutable accountability while the whistleblower's identity remains completely protected by zero-knowledge proofs.
-
-## Screenshots
-### Contract Compilation
-![Compile Output](./screenshots/compile-output.png)
-
-### Contract Deployment
-![Deployment Output](./screenshots/deployment-output.png)
-
+## Demo Video
+[PLACEHOLDER — I will add the link after recording]
