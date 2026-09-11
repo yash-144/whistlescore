@@ -1,8 +1,8 @@
 {
-  "name": "mn-demo",
+  "name": "whistlescore",
   "version": "1.0.0",
   "type": "module",
-  "description": "A Midnight Network application created with create-mn-app",
+  "description": "A privacy-preserving workplace safety & hazard counter built on Midnight",
   "author": "",
   "license": "MIT",
   "scripts": {
