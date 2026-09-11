@@ -1,0 +1,32 @@
+// =========================================================================
+// Privacy Model Explanation:
+// =========================================================================
+// PUBLIC:
+// - The `counter` state variable is public (on-chain, visible to anyone).
+// - The `step` value is disclosed publicly via `disclose()` in the `increment` circuit.
+// 
+// PRIVATE:
+// - The `secret_token` is a private witness provided as a circuit input.
+//   It is never placed on-chain and never revealed.
+// 
+// PROOF:
+// - The user proves they know the correct `secret_token` (must equal 42) 
+//   to increment the counter without revealing the token itself.
+// =========================================================================
+
+pragma language_version >= 0.23;
+
+import CompactStandardLibrary;
+
+export ledger counter: Uint<32>;
+
+export circuit increment(step: Uint<32>, secret_token: Uint<32>): [] {
+    // Prove we know the secret token, without revealing it
+    assert(secret_token == 42, "Invalid secret token");
+    
+    // Deliberately disclose the step amount to add it to the public state
+    const revealed_step = disclose(step);
+    
+    // Update the public state
+    counter = (counter + revealed_step) as Uint<32>;
+}
