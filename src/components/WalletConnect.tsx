@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, LogOut, CheckCircle2, AlertTriangle, Copy, ExternalLink, Shield } from 'lucide-react';
+import { Copy, Check, LogOut } from 'lucide-react';
 import type { WalletState } from '../hooks/useMidnight';
 
 interface WalletConnectProps {
@@ -15,7 +15,8 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
 
-  const copyAddress = () => {
+  const copyAddress = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (wallet.address) {
       navigator.clipboard.writeText(wallet.address);
       setCopied(true);
@@ -25,120 +26,84 @@ export const WalletConnect: React.FC<WalletConnectProps> = ({
 
   const truncateAddress = (addr: string) => {
     if (!addr) return '';
-    return `${addr.slice(0, 12)}...${addr.slice(-8)}`;
+    return `${addr.slice(0, 8)}...${addr.slice(-6)}`;
   };
 
+  if (wallet.isConnected) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button
+          onClick={copyAddress}
+          className="btn-glass-pill connected"
+          title="Click to copy connected address"
+        >
+          <span
+            style={{
+              width: '6px',
+              height: '6px',
+              borderRadius: '50%',
+              backgroundColor: '#16a34a',
+              boxShadow: '0 0 8px #16a34a',
+            }}
+          />
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', letterSpacing: '0.5px' }}>
+            {truncateAddress(wallet.address || '')}
+          </span>
+          {copied ? <Check size={12} color="#16a34a" /> : <Copy size={12} color="rgba(41,76,35,0.5)" />}
+        </button>
+
+        <button
+          onClick={onDisconnect}
+          className="btn-glass-pill"
+          style={{ padding: '8px 12px' }}
+          title="Disconnect wallet"
+        >
+          <LogOut size={12} color="#294c23" />
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      {wallet.isConnected ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          {/* Network Badge */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              borderRadius: '20px',
-              background: 'rgba(16, 185, 129, 0.1)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              fontSize: '12px',
-              fontWeight: 600,
-              color: '#34d399',
-            }}
-          >
-            <span
-              style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                backgroundColor: '#10b981',
-                boxShadow: '0 0 8px #10b981',
-              }}
-            />
-            Preprod / Preview
-          </div>
+    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+      <button
+        onClick={onConnect}
+        disabled={wallet.isConnecting}
+        className="btn-glass-pill"
+      >
+        <span
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            backgroundColor: '#294c23',
+            boxShadow: '0 0 8px #294c23',
+          }}
+        />
+        <span>{wallet.isConnecting ? 'Connecting...' : 'Connect Lace'}</span>
+      </button>
 
-          {/* Connected Address Pill */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '6px 14px',
-              borderRadius: '12px',
-              background: 'rgba(255, 255, 255, 0.06)',
-              border: '1px solid rgba(255, 255, 255, 0.12)',
-            }}
-          >
-            <Shield size={15} color="#818cf8" />
-            <span className="mono" style={{ fontSize: '13px', color: '#e2e8f0' }}>
-              {truncateAddress(wallet.address || '')}
-            </span>
-            <button
-              onClick={copyAddress}
-              title="Copy Address"
-              style={{
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-                color: copied ? '#34d399' : '#94a3b8',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '2px',
-              }}
-            >
-              {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
-            </button>
-          </div>
-
-          {/* Disconnect Button */}
-          <button
-            onClick={onDisconnect}
-            className="btn-danger"
-            title="Disconnect Wallet"
-          >
-            <LogOut size={14} />
-            <span>Disconnect</span>
-          </button>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <button
-            onClick={onConnect}
-            disabled={wallet.isConnecting}
-            className="btn-primary"
-            style={{ padding: '10px 20px', fontSize: '14px' }}
-          >
-            <Wallet size={16} />
-            <span>{wallet.isConnecting ? 'Connecting...' : 'Connect Lace Wallet'}</span>
-          </button>
-        </div>
-      )}
-
-      {/* Error notification if connection failed */}
       {wallet.error && (
         <div
           style={{
-            display: 'flex',
-            alignItems: 'flex-start',
-            gap: '8px',
-            padding: '10px 14px',
+            position: 'absolute',
+            top: 'calc(100% + 8px)',
+            right: 0,
+            whiteSpace: 'nowrap',
+            fontFamily: 'var(--font-pixel)',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: '#b91c1c',
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            border: '1.5px solid rgba(239, 68, 68, 0.6)',
+            padding: '5px 12px',
             borderRadius: '8px',
-            background: 'rgba(244, 63, 94, 0.1)',
-            border: '1px solid rgba(244, 63, 94, 0.3)',
-            color: '#fb7185',
-            fontSize: '12px',
-            marginTop: '4px',
+            boxShadow: '0 4px 16px rgba(185, 28, 28, 0.12)',
+            zIndex: 50,
+            animation: 'fadeIn 0.2s ease-out',
           }}
         >
-          <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-          <div>
-            <strong>Wallet Notice:</strong> {wallet.error}
-            <div style={{ marginTop: '4px', color: '#fda4af' }}>
-              Tip: Ensure the Midnight Lace browser extension is unlocked and configured for the Midnight testnet.
-            </div>
-          </div>
+          {wallet.error}
         </div>
       )}
     </div>
