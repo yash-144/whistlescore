@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+mn-demo/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+*.env
+
+# Runtime data & wallet seeds
+.midnight-state.json
+.midnight-wallet-state/
+*-state/
+*.seed
+*.log
+
+# OS & Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
