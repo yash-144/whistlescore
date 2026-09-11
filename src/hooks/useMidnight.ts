@@ -23,6 +23,12 @@ export interface CircuitCallState {
 export const PREPROD_CONTRACT_ADDRESS = '8d1e491d24fc5e2c43e16204ed8e4ac8cd26ad3659899b9769819d7ccd53c15f';
 const DEFAULT_NETWORK_ID = 'preview'; // Midnight Preview / Preprod
 
+const STORAGE_KEYS = {
+  WALLET_CONNECTED: 'whistlescore_wallet_connected',
+  COUNTER: `whistlescore_counter_${PREPROD_CONTRACT_ADDRESS}`,
+  LAST_TX: `whistlescore_last_tx_${PREPROD_CONTRACT_ADDRESS}`,
+};
+
 // Declare window.midnight for TypeScript
 declare global {
   interface Window {
@@ -43,24 +49,77 @@ export function useMidnight() {
 
   const [connectedApi, setConnectedApi] = useState<ConnectedAPI | null>(null);
 
-  const [counter, setCounter] = useState<bigint>(45n); // Initial workplace safety score
-  const [circuitState, setCircuitState] = useState<CircuitCallState>({
-    isCalling: false,
-    status: 'idle',
-    error: null,
-    lastTxId: null,
-    disclosedStep: null,
-    timestamp: null,
+  // Persisted on-chain workplace safety score across refreshes & reconnects
+  const [counter, setCounter] = useState<bigint>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEYS.COUNTER);
+        if (saved) {
+          const parsed = BigInt(saved);
+          return parsed >= 0n ? parsed : 45n;
+        }
+      } catch (e) {
+        console.warn('Failed to load counter from localStorage:', e);
+      }
+    }
+    return 45n; // Initial workplace safety score
   });
 
-  // Query or check wallet status on load
-  useEffect(() => {
-    // Check if wallet was previously connected in session
-    const saved = sessionStorage.getItem('whistlescore_wallet_connected');
-    if (saved === 'true' && window.midnight) {
-      connect();
+  // Persisted last confirmed transaction state across refreshes
+  const [circuitState, setCircuitState] = useState<CircuitCallState>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEYS.LAST_TX);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return {
+            isCalling: false,
+            status: 'confirmed',
+            error: null,
+            lastTxId: parsed.lastTxId || null,
+            disclosedStep: parsed.disclosedStep || null,
+            timestamp: parsed.timestamp || null,
+          };
+        }
+      } catch (e) {
+        console.warn('Failed to load last tx from localStorage:', e);
+      }
     }
-  }, []);
+    return {
+      isCalling: false,
+      status: 'idle',
+      error: null,
+      lastTxId: null,
+      disclosedStep: null,
+      timestamp: null,
+    };
+  });
+
+  // Check wallet status and auto-reconnect on page reload/mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem(STORAGE_KEYS.WALLET_CONNECTED);
+    if (saved !== 'true') return;
+
+    if (window.midnight) {
+      connect();
+      return;
+    }
+
+    // Lace extension might take a moment to inject into window.midnight
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (window.midnight) {
+        clearInterval(interval);
+        connect();
+      } else if (attempts >= 20) {
+        clearInterval(interval);
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [connect]);
 
   // Connect to Lace wallet
   const connect = useCallback(async () => {
@@ -171,7 +230,9 @@ export function useMidnight() {
         error: null,
       });
 
-      sessionStorage.setItem('whistlescore_wallet_connected', 'true');
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEYS.WALLET_CONNECTED, 'true');
+      }
     } catch (err: any) {
       console.error('Wallet connection failed:', err);
       const message = err?.message || 'Failed to connect to Midnight Lace wallet.';
@@ -196,7 +257,16 @@ export function useMidnight() {
       networkId: DEFAULT_NETWORK_ID,
       error: null,
     });
-    sessionStorage.removeItem('whistlescore_wallet_connected');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(STORAGE_KEYS.WALLET_CONNECTED);
+    }
+    // On-chain counter and confirmed transactions persist regardless of wallet state
+  }, []);
+
+  // Reset counter back to baseline score
+  const resetCounter = useCallback(() => {
+    const defaultScore = 45n;
+    setCounter(defaultScore);
     setCircuitState({
       isCalling: false,
       status: 'idle',
@@ -205,6 +275,14 @@ export function useMidnight() {
       disclosedStep: null,
       timestamp: null,
     });
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(STORAGE_KEYS.COUNTER, defaultScore.toString());
+        localStorage.removeItem(STORAGE_KEYS.LAST_TX);
+      } catch (e) {
+        console.warn('Failed to reset counter in localStorage:', e);
+      }
+    }
   }, []);
 
   // Call the increment circuit
@@ -251,8 +329,19 @@ export function useMidnight() {
         ).join('');
         const txId = `0x${randomHex}8d1e491d...preprod`;
 
-        // Update public counter state
-        setCounter((prev) => prev + BigInt(step));
+        // Update public counter state & persist
+        const confirmedTimestamp = new Date().toLocaleTimeString();
+        setCounter((prev) => {
+          const next = prev + BigInt(step);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem(STORAGE_KEYS.COUNTER, next.toString());
+            } catch (e) {
+              console.warn('Failed to save counter to localStorage:', e);
+            }
+          }
+          return next;
+        });
 
         setCircuitState({
           isCalling: false,
@@ -260,8 +349,23 @@ export function useMidnight() {
           error: null,
           lastTxId: txId,
           disclosedStep: step,
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: confirmedTimestamp,
         });
+
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(
+              STORAGE_KEYS.LAST_TX,
+              JSON.stringify({
+                lastTxId: txId,
+                disclosedStep: step,
+                timestamp: confirmedTimestamp,
+              }),
+            );
+          } catch (e) {
+            console.warn('Failed to persist last tx:', e);
+          }
+        }
       } catch (err: any) {
         console.error('Circuit call failed:', err);
         setCircuitState({
@@ -285,5 +389,6 @@ export function useMidnight() {
     connect,
     disconnect,
     callIncrement,
+    resetCounter,
   };
 }

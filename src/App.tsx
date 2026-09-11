@@ -23,6 +23,7 @@ export const App: React.FC = () => {
     connect,
     disconnect,
     callIncrement,
+    resetCounter,
   } = useMidnight();
 
   // Smooth Auto-Cycle Timer
@@ -106,6 +107,7 @@ export const App: React.FC = () => {
           circuitState={circuitState}
           contractAddress={contractAddress}
           onIncrement={callIncrement}
+          onResetCounter={resetCounter}
         />
       </main>
 

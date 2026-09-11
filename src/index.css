@@ -301,6 +301,35 @@ html, body, #root {
   border-right: 1.5px solid rgba(41, 76, 35, 0.15);
 }
 
+.dock-score-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-score-reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgba(41, 76, 35, 0.2);
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--meadow-green-dark);
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-score-reset:hover {
+  background: #ffffff;
+  color: var(--meadow-green);
+  border-color: var(--meadow-green);
+  transform: rotate(-90deg) scale(1.1);
+  box-shadow: 0 2px 8px rgba(41, 76, 35, 0.15);
+}
+
 .dock-score-num {
   font-family: var(--font-tall);
   font-size: 54px;

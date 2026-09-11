@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EyeOff, Sparkles, Loader2, Check } from 'lucide-react';
+import { EyeOff, Sparkles, Loader2, Check, RotateCcw } from 'lucide-react';
 import type { CircuitCallState, WalletState } from '../hooks/useMidnight';
 
 interface CircuitCallProps {
@@ -8,6 +8,7 @@ interface CircuitCallProps {
   circuitState: CircuitCallState;
   contractAddress: string;
   onIncrement: (step: number) => Promise<void>;
+  onResetCounter?: () => void;
 }
 
 export const CircuitCall: React.FC<CircuitCallProps> = ({
@@ -16,6 +17,7 @@ export const CircuitCall: React.FC<CircuitCallProps> = ({
   circuitState,
   contractAddress,
   onIncrement,
+  onResetCounter,
 }) => {
   const [selectedStep, setSelectedStep] = useState<number>(1);
 
@@ -29,8 +31,23 @@ export const CircuitCall: React.FC<CircuitCallProps> = ({
       {/* Floating Glowing Capsule (Direct Image 3 "Hey." Inspiration) */}
       <div className="capsule-dock">
         {/* Score Counter */}
-        <div className="dock-score-col">
-          <span className="dock-score-num">{counter.toString()}</span>
+        <div className="dock-score-col" title="Public Hazard Score (persisted on-chain)">
+          <div className="dock-score-row">
+            <span className="dock-score-num">{counter.toString()}</span>
+            {counter !== 45n && onResetCounter && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onResetCounter();
+                }}
+                className="btn-score-reset"
+                title="Reset counter to baseline (45)"
+              >
+                <RotateCcw size={10} />
+              </button>
+            )}
+          </div>
           <span className="dock-score-tag">Points</span>
         </div>
 
