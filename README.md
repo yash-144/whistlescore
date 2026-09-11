@@ -47,4 +47,9 @@ npx vitest run tests/counter.test.ts
 [LEAVE PLACEHOLDER — I will fill this in manually]
 
 ## Screenshots
-[LEAVE PLACEHOLDER — I will add compile output and contract address screenshots]
+### Contract Compilation
+![Compile Output](./screenshots/compile-output.png)
+
+### Contract Deployment
+![Deployment Output](./screenshots/deployment-output.png)
+
