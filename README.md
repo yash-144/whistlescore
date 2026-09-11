@@ -26,21 +26,24 @@ This contract maintains a public counter on the Midnight blockchain. Users can i
 ## Setup
 1. Clone the repository and navigate into the project root:
    ```bash
-   cd my-project
+   git clone <your-repo-url>
+   cd whistlescore
    ```
-2. Install the necessary testing and runtime dependencies:
+2. Install dependencies:
    ```bash
    npm install
    ```
-3. Compile the Compact contract to generate the local `managed` artifacts:
+3. Compile the Compact contract:
    ```bash
-   compact compile contracts/counter.compact managed/counter
+   npm run compile
+   # or: compact compile contracts/counter.compact managed/counter
    ```
 
 ## Run Tests
 Run the test suite to verify the circuit logic, state transitions, and privacy preservation:
 ```bash
-npx vitest run tests/counter.test.ts
+npm test
+# or: npx vitest run tests/counter.test.ts
 ```
 
 ## Initial Idea
