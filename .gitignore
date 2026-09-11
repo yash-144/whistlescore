@@ -27,4 +27,7 @@ MEMORY.md
 .DS_Store
 Thumbs.db
 .vscode/
-.idea/
+# Large media & screen recordings
+*.mov
+*.mp4
+*.webm
