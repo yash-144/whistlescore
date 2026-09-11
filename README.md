@@ -2,7 +2,7 @@
 > A privacy-preserving workplace safety & hazard counter built on Midnight using zero-knowledge proofs.
 
 ## Live Demo
-[PASTE LIVE URL AFTER DEPLOYING FRONTEND]
+https://whistlescore.vercel.app
 
 ## Contract Address
 | Network  | Address                          |
