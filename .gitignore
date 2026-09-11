@@ -20,6 +20,7 @@ build/
 *-state/
 *.seed
 *.log
+deployment-output.txt
 
 # OS & Editor
 .DS_Store
