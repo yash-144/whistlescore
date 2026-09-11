@@ -1,5 +1,5 @@
-# Midnight Counter
-> A simple Compact smart contract demonstrating private authorization to increment a public counter.
+# WhistleScore
+> A privacy-preserving workplace safety & hazard counter built on Midnight using zero-knowledge proofs.
 
 ## Contract Address
 | Network  | Address                          |
@@ -44,7 +44,7 @@ npx vitest run tests/counter.test.ts
 ```
 
 ## Initial Idea
-[LEAVE PLACEHOLDER — I will fill this in manually]
+In high-risk industries (aviation, manufacturing, healthcare), workers often hesitate to report safety violations due to fear of employer retaliation. WhistleScore allows verified employees to submit incident severity points to a public company safety score using a private employee voucher witness. Regulators and the public get transparent, immutable accountability while the whistleblower's identity remains completely protected by zero-knowledge proofs.
 
 ## Screenshots
 ### Contract Compilation
