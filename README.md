@@ -58,4 +58,9 @@ Midnight network, Compact, Midnight.js SDK, React/Vite, Lace wallet
    ```
 
 ## Demo Video
-[PLACEHOLDER — I will add the link after recording]
+- **Video Link**: [WhistleScore Level 2 Demo (Google Drive)](https://drive.google.com/file/d/1N-hW_10Q4fSLYr9kFii3bdocDFz0Mp3-/view?usp=sharing)
+- **Demo Walkthrough**:
+  1. Connecting and disconnecting Midnight Lace wallet on Preprod / Testnet.
+  2. Selecting incident severity (+1, +3, +5 points).
+  3. Proving the `increment` circuit in-browser using local private witness `secret_token == 42`.
+  4. Displaying verified state update on the public counter with the `Proved without revealing your input` privacy badge.
