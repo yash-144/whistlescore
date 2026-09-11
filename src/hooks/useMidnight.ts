@@ -83,11 +83,52 @@ export function useMidnight() {
       const [walletKey, initialApi] =
         walletEntries.find(([key]) => key.toLowerCase().includes('lace')) || walletEntries[0];
 
-      console.log(`Connecting to Midnight wallet [${walletKey}]...`);
-      const api = await initialApi.connect(DEFAULT_NETWORK_ID);
+      // Networks to try in order of likelihood (testnet/preprod/preview)
+      const CANDIDATE_NETWORKS = ['testnet', 'preprod', 'preview', 'undeployed', 'devnet', 'mainnet'];
+      let api: ConnectedAPI | null = null;
+      let connectedNetworkId = 'testnet';
+      let lastError: any = null;
+
+      console.log(`Connecting to Midnight wallet [${walletKey}]...`, {
+        availableWallets: Object.keys(window.midnight || {}),
+        walletProps: Object.getOwnPropertyNames(initialApi),
+      });
+
+      for (const netId of CANDIDATE_NETWORKS) {
+        try {
+          console.log(`Attempting Lace connection with networkId: [${netId}]...`);
+          api = await initialApi.connect(netId);
+          connectedNetworkId = netId;
+          console.log(`Lace successfully connected on network: [${netId}]`);
+          break;
+        } catch (err: any) {
+          lastError = err;
+          const errStr = `${err?.message || ''} ${err?.reason || ''} ${err || ''}`.toLowerCase();
+          if (errStr.includes('network') && (errStr.includes('mismatch') || errStr.includes('id'))) {
+            console.warn(`Network mismatch on [${netId}], trying next candidate...`);
+            continue;
+          }
+          // If it's a user rejection or other explicit error, don't keep looping
+          break;
+        }
+      }
+
+      if (!api) {
+        throw lastError || new Error('Network ID mismatch: please check your Lace wallet network settings.');
+      }
+
+      // Check wallet's reported configuration
+      try {
+        const config = await api.getConfiguration();
+        if (config?.networkId) {
+          connectedNetworkId = config.networkId;
+        }
+      } catch (e) {
+        console.warn('Could not read wallet getConfiguration:', e);
+      }
 
       // Fetch unshielded address
-      let unshieldedAddress = 'mn_addr_preview1t44vr36n6rj2sa4wwugchjnx6x77hqr2pjdlma9n4nr7l7udz2rqv0p84c';
+      let unshieldedAddress = 'mn_addr_test1t44vr36n6rj2sa4wwugchjnx6x77hqr2pjdlma9n4nr7l7udz2rqv0p84c';
       try {
         const addrRes = await api.getUnshieldedAddress();
         if (addrRes?.unshieldedAddress) {
@@ -126,7 +167,7 @@ export function useMidnight() {
         address: unshieldedAddress,
         shieldedAddress,
         dustBalance,
-        networkId: DEFAULT_NETWORK_ID,
+        networkId: connectedNetworkId,
         error: null,
       });
 
