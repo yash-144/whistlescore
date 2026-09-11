@@ -5,7 +5,7 @@
 | Network  | Address                          |
 |----------|----------------------------------|
 | Preview  | 8d1e491d24fc5e2c43e16204ed8e4ac8cd26ad3659899b9769819d7ccd53c15f |
-| Preprod  | [PASTE ADDRESS AFTER DEPLOY]     |
+| Preprod  | N/A (Deployed to Preview for Level 1) |
 
 ## What This Does
 This contract maintains a public counter on the Midnight blockchain. Users can increment the counter by a specific step amount, provided they can prove they know the correct secret authorization token. The step amount added is disclosed publicly, but the secret token is kept entirely private and never leaves the user's local machine.
@@ -26,7 +26,7 @@ This contract maintains a public counter on the Midnight blockchain. Users can i
 ## Setup
 1. Clone the repository and navigate into the project root:
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/yash-144/whistlescore.git
    cd whistlescore
    ```
 2. Install dependencies:
