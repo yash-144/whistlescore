@@ -95,32 +95,6 @@ export function useMidnight() {
     };
   });
 
-  // Check wallet status and auto-reconnect on page reload/mount
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const saved = localStorage.getItem(STORAGE_KEYS.WALLET_CONNECTED);
-    if (saved !== 'true') return;
-
-    if (window.midnight) {
-      connect();
-      return;
-    }
-
-    // Lace extension might take a moment to inject into window.midnight
-    let attempts = 0;
-    const interval = setInterval(() => {
-      attempts++;
-      if (window.midnight) {
-        clearInterval(interval);
-        connect();
-      } else if (attempts >= 20) {
-        clearInterval(interval);
-      }
-    }, 200);
-
-    return () => clearInterval(interval);
-  }, [connect]);
-
   // Connect to Lace wallet
   const connect = useCallback(async () => {
     setWallet((prev) => ({ ...prev, isConnecting: true, error: null }));
@@ -244,6 +218,32 @@ export function useMidnight() {
       }));
     }
   }, []);
+
+  // Check wallet status and auto-reconnect on page reload/mount
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = localStorage.getItem(STORAGE_KEYS.WALLET_CONNECTED);
+    if (saved !== 'true') return;
+
+    if (window.midnight) {
+      connect();
+      return;
+    }
+
+    // Lace extension might take a moment to inject into window.midnight
+    let attempts = 0;
+    const interval = setInterval(() => {
+      attempts++;
+      if (window.midnight) {
+        clearInterval(interval);
+        connect();
+      } else if (attempts >= 20) {
+        clearInterval(interval);
+      }
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, [connect]);
 
   // Disconnect wallet
   const disconnect = useCallback(() => {
