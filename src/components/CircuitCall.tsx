@@ -34,7 +34,7 @@ export const CircuitCall: React.FC<CircuitCallProps> = ({
         <div className="dock-score-col" title="Public Hazard Score (persisted on-chain)">
           <div className="dock-score-row">
             <span className="dock-score-num">{counter.toString()}</span>
-            {counter !== 45n && onResetCounter && (
+            {counter > 0n && onResetCounter && (
               <button
                 type="button"
                 onClick={(e) => {
@@ -42,7 +42,7 @@ export const CircuitCall: React.FC<CircuitCallProps> = ({
                   onResetCounter();
                 }}
                 className="btn-score-reset"
-                title="Reset counter to baseline (45)"
+                title="Reset counter to on-chain baseline"
               >
                 <RotateCcw size={10} />
               </button>
