@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EyeOff, Sparkles, Loader2, Check, RotateCcw } from 'lucide-react';
+import { EyeOff, Sparkles, Loader2, Check, RotateCcw, AlertCircle } from 'lucide-react';
 import type { CircuitCallState, WalletState } from '../hooks/useMidnight';
 
 interface CircuitCallProps {
@@ -123,6 +123,17 @@ export const CircuitCall: React.FC<CircuitCallProps> = ({
           <span>
             Confirmed on-chain (+{circuitState.disclosedStep} pts) • Tx: {circuitState.lastTxId}
           </span>
+        </div>
+      )}
+
+      {/* Error Line */}
+      {circuitState.error && (
+        <div
+          className="execution-telemetry execution-error"
+          role="alert"
+        >
+          <AlertCircle size={13} />
+          <span>{circuitState.error}</span>
         </div>
       )}
     </div>
